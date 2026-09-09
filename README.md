@@ -13,6 +13,59 @@
 | `23` | ЛР №3 | Аутентификация JWT, bcrypt, ролевая модель доступа (RBAC) |
 | `24` | ЛР №4 | React-клиент (Vite), useState/useEffect, localStorage |
 | `25` | ЛР №5 | Интеграция React с REST API: axios, JWT, оптимистичные обновления |
+| `26` | ЛР №6 | MongoDB + Mongoose, вложенные документы (отзывы, теги, расписание) |
+
+## Лабораторная работа №6 (ветка 26)
+
+Параллельно с реляционным API (PostgreSQL + Sequelize) реализовано документное
+хранилище профилей врачей на MongoDB и Mongoose. Реляционные маршруты `/doctors`
+сохранены, документные доступны по префиксу `/mongo/doctors`.
+
+Выбран локальный MongoDB 7 в Docker (п. 8 задания допускает локальную установку
+вместо Atlas). Данные просматриваются в mongo-express.
+
+### Запуск MongoDB
+
+```bash
+docker network create medconnect-net
+
+docker run -d --name medconnect-mongo --network medconnect-net \
+  -p 27017:27017 -v medconnect_mongodata:/data/db mongo:7
+
+docker run -d --name medconnect-mongo-express --network medconnect-net \
+  -e ME_CONFIG_MONGODB_URL=mongodb://medconnect-mongo:27017 \
+  -e ME_CONFIG_BASICAUTH=false -e ME_CONFIG_MONGODB_ENABLE_ADMIN=true \
+  -p 8081:8081 mongo-express:latest
+```
+
+mongo-express: `http://localhost:8081`.
+
+### Запуск приложения
+
+Дополнительно к шагам ЛР №5 в `.env` задаётся `MONGO_URI` (см. `.env.example`):
+
+```bash
+cd server
+npm install
+npm run seed:mongo     # профили врачей с отзывами и расписанием
+npm run dev            # http://localhost:3000
+```
+
+### Маршруты документного API
+
+| Метод | Маршрут | Назначение |
+|-------|---------|------------|
+| GET | `/mongo/doctors` | Список (`?specialty=&tag=&city=&limit=&skip=`) |
+| GET | `/mongo/doctors/stats` | Агрегация: средний рейтинг по специализациям |
+| GET | `/mongo/doctors/:id` | Профиль целиком, включая вложенные массивы |
+| POST | `/mongo/doctors` | Создание документа |
+| PUT | `/mongo/doctors/:id` | Обновление документа |
+| DELETE | `/mongo/doctors/:id` | Удаление с возвратом удалённого документа |
+| POST | `/mongo/doctors/:id/reviews` | `$push` отзыва |
+| PATCH | `/mongo/doctors/:id/reviews/:reviewId` | позиционный оператор `$` |
+| DELETE | `/mongo/doctors/:id/reviews/:reviewId` | `$pull` отзыва |
+| POST | `/mongo/doctors/:id/tags` | `$addToSet` тега |
+| POST | `/mongo/doctors/:id/schedule` | слот в расписании (`$addToSet` / `$push`) |
 
 ## Лабораторная работа №5 (ветка 25)
 
