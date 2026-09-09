@@ -15,7 +15,24 @@
 | `25` | ЛР №5 | Интеграция React с REST API: axios, JWT, оптимистичные обновления |
 | `26` | ЛР №6 | MongoDB + Mongoose, вложенные документы (отзывы, теги, расписание) |
 | `27` | ЛР №7 | Socket.IO: чат консультации, комнаты, история в MongoDB |
-| `28` | ЛР №8 | Docker и Docker Compose: backend, frontend, PostgreSQL, MongoDB |
+| `28`, `main` | ЛР №8 | Docker и Docker Compose: backend, frontend, PostgreSQL, MongoDB |
+
+Ветка `main` совпадает с итогом лабораторной работы №8. Чтобы проверить
+конкретную работу:
+
+```bash
+git clone https://github.com/YuryHich/MedConnect.git
+cd MedConnect
+git checkout 21    # ЛР №1; далее 22 / lab12 / 23 / 24 / 25 / 26 / 27 / 28
+```
+
+Демонстрационные учётные записи (с ЛР №3):
+
+| Роль | Email | Пароль |
+|------|-------|--------|
+| admin | admin@medconnect.by | Admin123! |
+| doctor | doctor@medconnect.by | Doctor123! |
+| patient | patient@medconnect.by | Patient123! |
 
 ## Лабораторная работа №8 (ветка 28)
 
