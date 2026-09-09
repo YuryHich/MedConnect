@@ -2,6 +2,7 @@
 // массивом заменена на вызовы методов Sequelize (ЛР №2), а доступ ограничен
 // аутентификацией и ролевой моделью (ЛР №3).
 const express = require('express');
+const { Op, Sequelize } = require('sequelize');
 const { Consultation, Doctor, User } = require('../models');
 const { authenticate } = require('../middleware/auth');
 const { parseId, badRequest } = require('../utils/http');
@@ -52,16 +53,40 @@ function isOwnerOrStaff(req, consultation) {
   return consultation.userId === req.user.id;
 }
 
-// GET /consultations - список консультаций
+// GET /consultations - список консультаций с поиском и пагинацией.
+// Параметры: ?search=строка&limit=число&offset=число&status=&format=
 router.get('/', async (req, res, next) => {
   try {
+    const limit = Math.min(Math.max(Number(req.query.limit) || 5, 1), 50);
+    const offset = Math.max(Number(req.query.offset) || 0, 0);
+
+    // Пациент видит только свои записи (ролевая модель из ЛР №3)
     const where = req.user.role === 'patient' ? { userId: req.user.id } : {};
-    const consultations = await Consultation.findAll({
+    if (req.query.status) where.status = req.query.status;
+    if (req.query.format) where.format = req.query.format;
+
+    // Поиск выполняется на сервере по имени пациента и имени врача
+    const search = (req.query.search || '').trim();
+    if (search) {
+      const pattern = `%${search}%`;
+      where[Op.or] = [
+        { patientName: { [Op.iLike]: pattern } },
+        Sequelize.where(Sequelize.col('doctor.fullName'), { [Op.iLike]: pattern }),
+        Sequelize.where(Sequelize.col('doctor.specialty'), { [Op.iLike]: pattern }),
+      ];
+    }
+
+    const { rows, count } = await Consultation.findAndCountAll({
       where,
       include: INCLUDE_RELATIONS,
       order: [['date', 'ASC'], ['startTime', 'ASC']],
+      limit,
+      offset,
+      subQuery: false,
+      distinct: true,
     });
-    res.status(200).json(consultations);
+
+    res.status(200).json({ items: rows, total: count, limit, offset });
   } catch (err) {
     next(err);
   }

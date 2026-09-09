@@ -12,6 +12,48 @@
 | `22`, `lab12` | ЛР №2 | PostgreSQL + ORM Sequelize, модели, миграции, сиды |
 | `23` | ЛР №3 | Аутентификация JWT, bcrypt, ролевая модель доступа (RBAC) |
 | `24` | ЛР №4 | React-клиент (Vite), useState/useEffect, localStorage |
+| `25` | ЛР №5 | Интеграция React с REST API: axios, JWT, оптимистичные обновления |
+
+## Лабораторная работа №5 (ветка 25)
+
+Клиент работает с серверным API: список консультаций загружается с сервера,
+в `localStorage` остаётся только JWT-токен.
+
+### Запуск
+
+Нужны два процесса. Сначала сервер (см. ЛР №3), затем клиент:
+
+```bash
+# терминал 1
+cd server
+npm install
+npx sequelize-cli db:migrate
+npx sequelize-cli db:seed:all
+npm run dev            # http://localhost:3000
+
+# терминал 2
+cd client
+npm install
+copy .env.example .env # VITE_API_URL=http://localhost:3000/api
+npm run dev            # http://localhost:5173
+```
+
+Войти можно любой демонстрационной учётной записью из таблицы ЛР №3.
+
+### Реализовано
+
+- `src/api.js`: экземпляр axios, перехватчик запроса с `Authorization: Bearer`,
+  перехватчик ответа с единой обработкой ошибок и выходом по 401
+- состояния загрузки и ошибки, кнопка «Повторить»
+- оптимистичные добавление, редактирование и удаление с откатом по снимку
+- серверный поиск с задержкой 400 мс (`?search=`)
+- постраничная навигация (`?limit=&offset=`)
+- отмена запросов через `AbortController`
+
+### Изменение в API
+
+`GET /consultations` теперь принимает `?search=&status=&format=&limit=&offset=`
+и возвращает `{ items, total, limit, offset }`.
 
 ## Лабораторная работа №4 (ветка 24)
 

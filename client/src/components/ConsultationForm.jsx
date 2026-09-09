@@ -1,9 +1,8 @@
 ﻿import { useEffect, useState } from 'react';
-import { FORMATS, SPECIALTIES, STATUSES } from '../data/mockConsultations';
+import { FORMATS, STATUSES } from '../data/dictionaries';
 
 const EMPTY_FORM = {
-  doctorName: '',
-  specialty: SPECIALTIES[0],
+  doctorId: '',
   patientName: '',
   date: '',
   startTime: '',
@@ -14,16 +13,27 @@ const EMPTY_FORM = {
 };
 
 /**
- * Контролируемая форма создания и редактирования консультации: значение каждого
- * поля хранится в состоянии React, а элементы ввода получают его через value.
+ * Контролируемая форма создания и редактирования консультации. Врач выбирается
+ * из справочника, загруженного с сервера, поэтому в запросе передаётся doctorId.
  */
-export function ConsultationForm({ editing, onSubmit, onCancel }) {
+export function ConsultationForm({ editing, doctors, onSubmit, onCancel, isBusy }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState('');
 
   // При выборе записи для редактирования форма заполняется её значениями
   useEffect(() => {
-    setForm(editing ? { ...editing, price: String(editing.price) } : EMPTY_FORM);
+    setForm(editing
+      ? {
+        doctorId: String(editing.doctorId),
+        patientName: editing.patientName,
+        date: editing.date,
+        startTime: editing.startTime,
+        endTime: editing.endTime,
+        format: editing.format,
+        status: editing.status,
+        price: String(editing.price),
+      }
+      : EMPTY_FORM);
     setError('');
   }, [editing]);
 
@@ -34,7 +44,7 @@ export function ConsultationForm({ editing, onSubmit, onCancel }) {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const required = ['doctorName', 'patientName', 'date', 'startTime', 'endTime'];
+    const required = ['doctorId', 'patientName', 'date', 'startTime', 'endTime'];
     const missing = required.filter((field) => !String(form[field]).trim());
     if (missing.length > 0) {
       setError('Заполните все обязательные поля');
@@ -45,12 +55,16 @@ export function ConsultationForm({ editing, onSubmit, onCancel }) {
       return;
     }
 
-    onSubmit({ ...form, price: Number(form.price) || 0 });
-    setForm(EMPTY_FORM);
+    onSubmit({
+      ...form,
+      doctorId: Number(form.doctorId),
+      price: Number(form.price) || 0,
+    });
+    if (!editing) setForm((prev) => ({ ...EMPTY_FORM, doctorId: prev.doctorId }));
     setError('');
   };
 
-  // Горячая клавиша: Enter добавляет запись, Escape отменяет редактирование
+  // Горячие клавиши: Enter отправляет форму, Escape отменяет редактирование
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' && event.target.tagName !== 'BUTTON') {
       handleSubmit(event);
@@ -67,19 +81,12 @@ export function ConsultationForm({ editing, onSubmit, onCancel }) {
       <div className="form-grid">
         <label>
           Врач
-          <input
-            type="text"
-            name="doctorName" value={form.doctorName}
-            onChange={update('doctorName')}
-            placeholder="Фамилия и имя врача"
-          />
-        </label>
-
-        <label>
-          Специализация
-          <select name="specialty" value={form.specialty} onChange={update('specialty')}>
-            {SPECIALTIES.map((specialty) => (
-              <option key={specialty} value={specialty}>{specialty}</option>
+          <select name="doctorId" value={form.doctorId} onChange={update('doctorId')}>
+            <option value="">— выберите врача —</option>
+            {doctors.map((doctor) => (
+              <option key={doctor.id} value={doctor.id}>
+                {doctor.fullName} — {doctor.specialty}
+              </option>
             ))}
           </select>
         </label>
@@ -88,7 +95,8 @@ export function ConsultationForm({ editing, onSubmit, onCancel }) {
           Пациент
           <input
             type="text"
-            name="patientName" value={form.patientName}
+            name="patientName"
+            value={form.patientName}
             onChange={update('patientName')}
             placeholder="Фамилия и имя пациента"
           />
@@ -101,12 +109,14 @@ export function ConsultationForm({ editing, onSubmit, onCancel }) {
 
         <label>
           Начало
-          <input type="time" name="startTime" value={form.startTime} onChange={update('startTime')} />
+          <input type="time" name="startTime" value={form.startTime}
+            onChange={update('startTime')} />
         </label>
 
         <label>
           Окончание
-          <input type="time" name="endTime" value={form.endTime} onChange={update('endTime')} />
+          <input type="time" name="endTime" value={form.endTime}
+            onChange={update('endTime')} />
         </label>
 
         <label>
@@ -129,27 +139,21 @@ export function ConsultationForm({ editing, onSubmit, onCancel }) {
 
         <label>
           Стоимость, BYN
-          <input
-            type="number"
-            min="0"
-            name="price" value={form.price}
-            onChange={update('price')}
-            placeholder="0"
-          />
+          <input type="number" min="0" name="price" value={form.price}
+            onChange={update('price')} placeholder="0" />
         </label>
       </div>
 
       {error && <p className="error">{error}</p>}
 
       <div className="form-actions">
-        <button type="submit" className="primary">
+        <button type="submit" className="primary" disabled={isBusy}>
           {editing ? 'Сохранить изменения' : 'Добавить консультацию'}
         </button>
         {editing && (
-          <button type="button" onClick={onCancel}>
-            Отмена
-          </button>
+          <button type="button" onClick={onCancel}>Отмена</button>
         )}
+        {isBusy && <span className="inline-spinner" title="Запрос выполняется" />}
       </div>
     </form>
   );
