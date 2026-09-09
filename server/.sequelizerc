@@ -1,0 +1,10 @@
+const path = require('path');
+
+// Sequelize CLI reads the configuration from a JS file so that the connection
+// string can be taken from environment variables (.env).
+module.exports = {
+  config: path.resolve('config', 'config.js'),
+  'models-path': path.resolve('models'),
+  'migrations-path': path.resolve('migrations'),
+  'seeders-path': path.resolve('seeders'),
+};
