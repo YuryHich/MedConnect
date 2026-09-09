@@ -1,0 +1,273 @@
+:root {
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --border: #dfe3ec;
+  --text: #1f2430;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-dark: #1d4ed8;
+  --danger: #dc2626;
+  --green: #16a34a;
+  --amber: #d97706;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.app {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  color: var(--accent-dark);
+}
+
+.muted {
+  color: var(--muted);
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+h2 {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+/* --- статистика --- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  text-align: center;
+}
+
+.stats-value {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.stats-label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.save-saving { color: var(--amber); }
+.save-saved { color: var(--green); }
+
+/* --- формы --- */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+input,
+select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--text);
+  background: #fff;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.25);
+  border-color: var(--accent);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+button {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+button.primary:hover {
+  background: var(--accent-dark);
+  color: #fff;
+}
+
+button.danger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.error {
+  color: var(--danger);
+  font-size: 13px;
+  margin: 10px 0 0;
+}
+
+/* --- фильтры --- */
+.filters {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.3fr auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.result-count {
+  margin: 0 0 10px 2px;
+}
+
+/* --- список --- */
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  border-left: 4px solid var(--border);
+}
+
+.item.status-planned { border-left-color: var(--accent); }
+.item.status-completed { border-left-color: var(--green); }
+.item.status-cancelled { border-left-color: var(--danger); }
+
+.item-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.item-main h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: #eef2ff;
+  color: var(--accent-dark);
+}
+
+.badge.completed { background: #e7f7ed; color: var(--green); }
+.badge.cancelled { background: #fdeaea; color: var(--danger); }
+
+.item-details {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.item-details dt {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.item-details dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+}
+
+.item-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+}
+
+/* --- загрузка --- */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.footer {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .stats,
+  .form-grid,
+  .filters,
+  .item-details {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
