@@ -4,7 +4,9 @@
 
 require('dotenv').config();
 
+const fs = require('fs');
 const http = require('http');
+const path = require('path');
 const cors = require('cors');
 const express = require('express');
 const { Server } = require('socket.io');
@@ -23,6 +25,16 @@ const app = express();
 const httpServer = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+const LOG_DIR = process.env.LOG_DIR || path.join(__dirname, 'logs');
+
+function fileLog(line) {
+  try {
+    fs.mkdirSync(LOG_DIR, { recursive: true });
+    fs.appendFileSync(path.join(LOG_DIR, 'server.log'), `${new Date().toISOString()} ${line}\n`);
+  } catch (err) {
+    console.warn('Unable to write log file:', err.message);
+  }
+}
 
 const io = new Server(httpServer, {
   cors: { origin: CORS_ORIGIN, methods: ['GET', 'POST'] },
@@ -132,8 +144,10 @@ async function start() {
   await connectMongo();
 
   httpServer.listen(PORT, () => {
-    console.log(`MedConnect API server is listening on http://localhost:${PORT}`);
+    const msg = `MedConnect API server is listening on http://localhost:${PORT}`;
+    console.log(msg);
     console.log('Socket.IO chat is attached (rooms consultation:<id>)');
+    fileLog(msg);
   });
 }
 

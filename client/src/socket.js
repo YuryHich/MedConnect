@@ -1,7 +1,8 @@
 import { io } from 'socket.io-client';
 import { getToken } from './api';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3000';
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL
+  || (import.meta.env.DEV ? 'http://localhost:3000' : window.location.origin);
 
 /**
  * Создаёт Socket.IO-клиент с JWT из localStorage.

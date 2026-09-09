@@ -15,6 +15,38 @@
 | `25` | ЛР №5 | Интеграция React с REST API: axios, JWT, оптимистичные обновления |
 | `26` | ЛР №6 | MongoDB + Mongoose, вложенные документы (отзывы, теги, расписание) |
 | `27` | ЛР №7 | Socket.IO: чат консультации, комнаты, история в MongoDB |
+| `28` | ЛР №8 | Docker и Docker Compose: backend, frontend, PostgreSQL, MongoDB |
+
+## Лабораторная работа №8 (ветка 28)
+
+Всё приложение поднимается одной командой. Frontend (Nginx, порт 80) проксирует
+`/api` и `/socket.io` на backend. PostgreSQL и MongoDB работают во внутренней
+сети `backend-net`, наружу смотрят только frontend и опубликованный порт API.
+
+### Запуск
+
+```bash
+copy .env.example .env
+docker compose up --build
+```
+
+Откройте http://localhost — клиент. API: http://localhost:5000/health.
+
+Миграции и сиды выполняются при старте контейнера backend. Данные БД и логи
+backend сохраняются в томах `pgdata`, `mongodata`, `backend_logs`.
+
+Опциональные веб-интерфейсы БД:
+
+```bash
+docker compose --profile tools up -d pgadmin mongo-express
+```
+
+### Остановка
+
+```bash
+docker compose down          # контейнеры
+docker compose down -v       # вместе с томами
+```
 
 ## Лабораторная работа №7 (ветка 27)
 

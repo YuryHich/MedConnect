@@ -1,0 +1,126 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: medconnect-compose-pg
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend-net
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    container_name: medconnect-compose-mongo
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    networks:
+      - backend-net
+    restart: unless-stopped
+
+  backend:
+    build: ./server
+    container_name: medconnect-compose-backend
+    env_file: .env
+    environment:
+      PORT: 5000
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      MONGO_URI: mongodb://mongo:27017/medconnect
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      LOG_DIR: /app/logs
+    ports:
+      - "5000:5000"
+    volumes:
+      - backend_logs:/app/logs
+    depends_on:
+      db:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 30s
+    networks:
+      - backend-net
+      - frontend-net
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: /api
+        VITE_SOCKET_URL: ""
+    container_name: medconnect-compose-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - frontend-net
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: medconnect-compose-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend-net
+    restart: unless-stopped
+    profiles: ["tools"]
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: medconnect-compose-mongo-express
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017
+      ME_CONFIG_BASICAUTH: "false"
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+    ports:
+      - "8081:8081"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - backend-net
+    restart: unless-stopped
+    profiles: ["tools"]
+
+volumes:
+  pgdata:
+    name: medconnect_compose_pgdata
+  mongodata:
+    name: medconnect_compose_mongodata
+  backend_logs:
+    name: medconnect_compose_logs
+
+networks:
+  frontend-net:
+  backend-net:
