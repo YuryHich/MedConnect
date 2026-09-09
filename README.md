@@ -10,6 +10,56 @@
 |-------|--------|------------|
 | `21` | ЛР №1 | REST API на Node.js + Express, хранение во временном массиве |
 | `22`, `lab12` | ЛР №2 | PostgreSQL + ORM Sequelize, модели, миграции, сиды |
+| `23` | ЛР №3 | Аутентификация JWT, bcrypt, ролевая модель доступа (RBAC) |
+
+## Лабораторная работа №3 (ветка 23)
+
+Аутентификация по JWT и ролевая модель доступа. Роли: `patient`, `doctor`,
+`admin`.
+
+### Запуск
+
+Дополнительно к шагам ЛР №2 в `.env` задаются `JWT_SECRET` и `JWT_EXPIRES_IN`
+(см. `.env.example`). После `db:seed:all` доступны демонстрационные учётные
+записи:
+
+| Роль | Email | Пароль |
+|------|-------|--------|
+| admin | `admin@medconnect.by` | `Admin123!` |
+| doctor | `doctor@medconnect.by` | `Doctor123!` |
+| patient | `patient@medconnect.by` | `Patient123!` |
+
+### Маршруты аутентификации
+
+| Метод | Маршрут | Назначение | Успешный статус |
+|-------|---------|------------|-----------------|
+| POST | `/auth/register` | Регистрация (`email`, `password`, `fullName`, `role`) | 201 |
+| POST | `/auth/login` | Вход, выдача JWT | 200 |
+| GET | `/auth/me` | Текущий пользователь по токену | 200 |
+| GET | `/profile` | Профиль и консультации пользователя | 200 |
+| GET | `/users` | Список пользователей (только admin) | 200 |
+| PATCH | `/users/:id/role` | Изменение роли (только admin) | 200 |
+| DELETE | `/users/:id` | Удаление пользователя (только admin) | 204 |
+
+Токен передаётся в заголовке `Authorization: Bearer <token>`.
+
+### Права доступа
+
+| Маршрут | Аноним | patient | doctor | admin |
+|---------|--------|---------|--------|-------|
+| `GET /doctors` | + | + | + | + |
+| `POST/PUT/DELETE /doctors` | 401 | 403 | 403 | + |
+| `GET /consultations` | 401 | только свои | все | все |
+| `POST /consultations` | 401 | + | + | + |
+| `PUT/DELETE /consultations/:id` | 401 | только свои | все | все |
+| `GET /users` | 401 | 403 | 403 | + |
+
+### Демонстрационные скрипты
+
+```bash
+node scripts/jwt-demo.js      # структура JWT и проверка подписи
+node scripts/bcrypt-demo.js   # влияние соли на хеш пароля
+```
 
 ## Лабораторная работа №2 (ветки 22 и lab12)
 

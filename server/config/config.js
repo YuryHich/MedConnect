@@ -10,6 +10,9 @@ const base = {
   dialect: 'postgres',
   logging: process.env.DB_LOGGING === 'true' ? console.log : false,
   dialectOptions: useSsl ? { ssl: { require: true, rejectUnauthorized: false } } : {},
+  // выполненные сиды фиксируются в таблице SequelizeData, поэтому повторный
+  // запуск db:seed:all не создаёт дубликаты тестовых данных
+  seederStorage: 'sequelize',
 };
 
 module.exports = {

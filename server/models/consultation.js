@@ -12,6 +12,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'doctorId',
         as: 'doctor',
       });
+      // ...и пользователю, который её оформил (добавлено в ЛР №3)
+      Consultation.belongsTo(models.User, {
+        foreignKey: 'userId',
+        as: 'patient',
+      });
     }
 
     // Кастомный метод экземпляра: длительность консультации в минутах
@@ -82,6 +87,12 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 0,
         validate: { min: 0 },
+      },
+      // Владелец записи, добавлен миграцией add-user-id-to-consultations (ЛР №3)
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: 'Users', key: 'id' },
       },
     },
     {

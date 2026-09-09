@@ -1,7 +1,10 @@
 // CRUD-маршруты врачей: вторая сущность модели данных, связанная с
 // консультациями отношением один-ко-многим.
+// Каталог врачей доступен всем, изменять его может только администратор.
 const express = require('express');
 const { Doctor, Consultation } = require('../models');
+const { authenticate } = require('../middleware/auth');
+const { isAdmin } = require('../middleware/roles');
 const { parseId, badRequest } = require('../utils/http');
 
 const router = express.Router();
@@ -64,8 +67,8 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// POST /doctors - создание врача
-router.post('/', async (req, res, next) => {
+// POST /doctors - создание врача (только администратор)
+router.post('/', authenticate, isAdmin, async (req, res, next) => {
   try {
     const missing = missingFields(req.body || {});
     if (missing.length > 0) {
@@ -78,8 +81,8 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-// PUT /doctors/:id - полное обновление врача
-router.put('/:id', async (req, res, next) => {
+// PUT /doctors/:id - полное обновление врача (только администратор)
+router.put('/:id', authenticate, isAdmin, async (req, res, next) => {
   try {
     const id = parseId(req.params.id);
     if (id === null) {
@@ -103,8 +106,8 @@ router.put('/:id', async (req, res, next) => {
   }
 });
 
-// DELETE /doctors/:id - удаление врача вместе с его консультациями (CASCADE)
-router.delete('/:id', async (req, res, next) => {
+// DELETE /doctors/:id - удаление врача вместе с его консультациями (только администратор)
+router.delete('/:id', authenticate, isAdmin, async (req, res, next) => {
   try {
     const id = parseId(req.params.id);
     if (id === null) {
