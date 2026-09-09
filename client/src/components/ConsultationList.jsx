@@ -4,7 +4,7 @@ import { formatLabel, statusLabel } from '../data/dictionaries';
  * Отображение списка консультаций, полученного с сервера. Записи с временным
  * идентификатором (оптимистично добавленные) помечаются как отправляемые.
  */
-export function ConsultationList({ items, onEdit, onDelete, busyIds }) {
+export function ConsultationList({ items, onEdit, onDelete, onOpenChat, busyIds }) {
   if (items.length === 0) {
     return (
       <div className="card empty">
@@ -54,6 +54,9 @@ export function ConsultationList({ items, onEdit, onDelete, busyIds }) {
             </dl>
 
             <div className="item-actions">
+              <button type="button" onClick={() => onOpenChat(item)} disabled={isPending}>
+                Открыть чат
+              </button>
               <button type="button" onClick={() => onEdit(item)} disabled={isPending}>
                 Редактировать
               </button>

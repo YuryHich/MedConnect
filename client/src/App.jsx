@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as api from './api';
+import { ChatRoom } from './components/ChatRoom';
 import { ConsultationForm } from './components/ConsultationForm';
 import { ConsultationList } from './components/ConsultationList';
 import { LoginForm } from './components/LoginForm';
@@ -33,6 +34,7 @@ export default function App() {
   const [status, setStatus] = useState('');
   const [page, setPage] = useState(0);
   const [editing, setEditing] = useState(null);
+  const [chatTarget, setChatTarget] = useState(null);
   const [reloadToken, setReloadToken] = useState(0);
 
   // Поисковый запрос отправляется только через 400 мс после последнего ввода
@@ -259,6 +261,14 @@ export default function App() {
         isBusy={isSubmitting}
       />
 
+      {chatTarget && (
+        <ChatRoom
+          consultation={chatTarget}
+          user={user}
+          onClose={() => setChatTarget(null)}
+        />
+      )}
+
       <div className="card filters">
         <label>
           Поиск на сервере
@@ -317,6 +327,7 @@ export default function App() {
             items={items}
             onEdit={setEditing}
             onDelete={handleDelete}
+            onOpenChat={setChatTarget}
             busyIds={busyIds}
           />
 
@@ -338,7 +349,7 @@ export default function App() {
 
       <footer className="footer muted">
         Данные загружаются с REST API {import.meta.env.VITE_API_URL || 'http://localhost:3000/api'};
-        JWT хранится в localStorage и подставляется перехватчиком axios
+        чат консультации идёт через Socket.IO, история хранится в MongoDB
       </footer>
     </div>
   );
